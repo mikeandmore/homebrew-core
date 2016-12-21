@@ -135,6 +135,7 @@ class Llvm < Formula
   option "with-python", "Build bindings against custom Python"
   option "with-shared-libs", "Build shared instead of static libraries"
   option "without-libffi", "Do not use libffi to call external functions"
+  option "without-gcc", "Do use libgcc from Homebrew"
   option "with-all-targets", "Build all targets. Default targets: AMDGPU, ARM, NVPTX, and X86"
 
   depends_on "libffi" => :recommended # http://llvm.org/docs/GettingStarted.html#requirement
@@ -147,7 +148,7 @@ class Llvm < Formula
   end
 
   unless OS.mac?
-    depends_on "gcc" # <atomic> is provided by gcc
+    depends_on "gcc" if build.with? "gcc" # <atomic> is provided by gcc
     depends_on "glibc" => GlibcRequirement.system_version.to_f >= 2.19 ? :optional : :recommended
     depends_on "binutils" if build.with? "glibc"
     depends_on "homebrew/dupes/libedit" # llvm requires <histedit.h>
@@ -273,7 +274,7 @@ class Llvm < Formula
     end
 
     # Help just-built clang++ find <atomic> (and, possibly, other header files). Needed for compiler-rt
-    unless OS.mac?
+    if not OS.mac? and build.with? "gcc"
       gccpref = Formula["gcc"].opt_prefix.to_s
       args << "-DGCC_INSTALL_PREFIX=#{gccpref}"
       args << "-DCMAKE_C_COMPILER=#{gccpref}/bin/gcc"
