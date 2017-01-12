@@ -149,7 +149,7 @@ class Llvm < Formula
   unless OS.mac?
     depends_on "gcc" # <atomic> is provided by gcc
     depends_on "glibc" => GlibcRequirement.system_version.to_f >= 2.19 ? :optional : :recommended
-    depends_on "binutils" # for gold plugin
+    depends_on "binutils" if OS.linux? # needed for gold plugin
     depends_on "homebrew/dupes/libedit" # llvm requires <histedit.h>
     depends_on "libxml2"
     needs :cxx11
@@ -262,7 +262,7 @@ class Llvm < Formula
     end
 
     # Enable llvm gold plugin for LTO
-    args << "-DLLVM_BINUTILS_INCDIR=#{Formula["binutils"].opt_include}" unless OS.mac?
+    args << "-DLLVM_BINUTILS_INCDIR=#{Formula["binutils"].opt_include}" if OS.linux?
 
     if build.with? "libffi"
       args << "-DLLVM_ENABLE_FFI=ON"
